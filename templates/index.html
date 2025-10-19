@@ -58,6 +58,13 @@
             padding: 10px;
             margin-bottom: 20px;
         }
+        .shutdown-btn {
+            transition: all 0.3s ease;
+        }
+        .shutdown-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -107,6 +114,13 @@
                                         <i class="fas fa-unlink"></i> Disconnect
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12 text-end">
+                                <button id="shutdown-btn" class="btn btn-outline-danger btn-sm shutdown-btn">
+                                    <i class="fas fa-power-off"></i> Kill Server
+                                </button>
                             </div>
                         </div>
                     </div>

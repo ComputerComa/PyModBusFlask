@@ -48,6 +48,9 @@ class ModbusWebClient {
         document.getElementById('import-names-btn').addEventListener('click', () => document.getElementById('import-file-input').click());
         document.getElementById('import-file-input').addEventListener('change', (e) => this.importNames(e));
         
+        // Shutdown button
+        document.getElementById('shutdown-btn').addEventListener('click', () => this.shutdownServer());
+        
         // Start auto refresh if enabled
         if (document.getElementById('auto-refresh').checked) {
             this.startAutoRefresh();
@@ -605,6 +608,41 @@ class ModbusWebClient {
 
         // Clear file input
         event.target.value = '';
+    }
+
+    async shutdownServer() {
+        if (confirm('Are you sure you want to shut down the server? This will close the application.')) {
+            try {
+                const response = await fetch('/api/shutdown', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    this.showToast('Server is shutting down...', 'info');
+                    // Redirect to a shutdown page or show message
+                    setTimeout(() => {
+                        document.body.innerHTML = `
+                            <div class="container-fluid d-flex justify-content-center align-items-center" style="height: 100vh;">
+                                <div class="text-center">
+                                    <h1><i class="fas fa-power-off text-danger"></i> Server Shutdown</h1>
+                                    <p class="lead">The Modbus TCP Client server has been shut down.</p>
+                                    <p class="text-muted">You can close this browser tab.</p>
+                                </div>
+                            </div>
+                        `;
+                    }, 2000);
+                } else {
+                    this.showToast(result.message, 'error');
+                }
+            } catch (error) {
+                this.showToast('Failed to shutdown server: ' + error.message, 'error');
+            }
+        }
     }
 }
 

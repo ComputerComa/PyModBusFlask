@@ -2,6 +2,9 @@ from flask import Flask, render_template, jsonify, request, send_file
 from flask_cors import CORS
 import os
 import logging
+import threading
+import signal
+import sys
 from modbus_client import ModbusClient
 from config import Config
 from names_manager import NamesManager
@@ -16,6 +19,14 @@ CORS(app)
 # Initialize Modbus client and names manager
 modbus_client = ModbusClient()
 names_manager = NamesManager()
+
+# Global variable to track server shutdown
+server_shutdown = threading.Event()
+
+def shutdown_server():
+    """Function to gracefully shutdown the server"""
+    server_shutdown.set()
+    os._exit(0)
 
 @app.route('/')
 def index():
@@ -253,6 +264,18 @@ def import_names():
             return jsonify({'status': 'error', 'message': 'Invalid file format. Please upload a JSON file.'})
     except Exception as e:
         logger.error(f"Import names error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/api/shutdown', methods=['POST'])
+def shutdown():
+    """Shutdown the server"""
+    try:
+        logger.info("Server shutdown requested from web interface")
+        # Use a thread to shutdown after response is sent
+        threading.Timer(1.0, shutdown_server).start()
+        return jsonify({'status': 'success', 'message': 'Server shutting down...'})
+    except Exception as e:
+        logger.error(f"Shutdown error: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
 
 if __name__ == '__main__':

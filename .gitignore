@@ -5,3 +5,5 @@ __pycache__/
 .env
 modbus_names_export.json
 modbus_names.bin
+build/
+dist/
