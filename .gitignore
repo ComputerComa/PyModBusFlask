@@ -3,3 +3,5 @@ __pycache__/
 *export*.json
 *.bin
 .env
+modbus_names_export.json
+modbus_names.bin
