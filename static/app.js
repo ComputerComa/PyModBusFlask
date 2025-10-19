@@ -2,7 +2,9 @@ class ModbusWebClient {
     constructor() {
         this.connected = false;
         this.autoRefreshInterval = null;
-        this.refreshInterval = 5000; // 5 seconds
+        this.inputsRefreshInterval = null;
+        this.refreshInterval = 5000; // 5 seconds for coils and registers
+        this.inputsRefreshIntervalTime = 2000; // 2 seconds for inputs (faster)
         this.lastManualWrite = null; // Track last manual write time
         this.writeDelay = 2000; // 2 seconds delay before allowing auto-refresh
         this.names = { inputs: {}, coils: {}, registers: {} };
@@ -21,13 +23,21 @@ class ModbusWebClient {
         // Refresh button
         document.getElementById('refresh-btn').addEventListener('click', () => this.refreshAll());
         
-        // Auto refresh toggle
+        // Auto refresh toggles
         document.getElementById('auto-refresh').addEventListener('change', (e) => {
             if (e.target.checked) {
                 this.startAutoRefresh();
             } else {
                 this.stopAutoRefresh();
             }
+        });
+        
+        document.getElementById('inputs-refresh').addEventListener('change', (e) => {
+            this.updateRefreshIntervals();
+        });
+        
+        document.getElementById('controls-refresh').addEventListener('change', (e) => {
+            this.updateRefreshIntervals();
         });
         
         // Names management buttons
@@ -74,6 +84,7 @@ class ModbusWebClient {
                 this.updateConnectionStatus();
                 this.showToast('Connected successfully!', 'success');
                 this.refreshAll();
+                this.updateRefreshIntervals(); // Start auto-refresh if enabled
             } else {
                 this.showToast(result.message, 'error');
             }
@@ -98,6 +109,7 @@ class ModbusWebClient {
                 this.updateConnectionStatus();
                 this.showToast('Disconnected successfully!', 'info');
                 this.clearData();
+                this.stopAutoRefresh(); // Stop all refresh timers
             } else {
                 this.showToast(result.message, 'error');
             }
@@ -133,18 +145,11 @@ class ModbusWebClient {
             statusElement.className = 'badge bg-secondary ms-2';
             connectBtn.disabled = false;
             disconnectBtn.disabled = true;
-            this.stopAutoRefresh();
         }
     }
 
     async refreshAll() {
         if (!this.connected) return;
-
-        // Don't auto-refresh if we just made a manual write
-        if (this.lastManualWrite && (Date.now() - this.lastManualWrite) < this.writeDelay) {
-            console.log('Skipping auto-refresh due to recent manual write');
-            return;
-        }
 
         try {
             await Promise.all([
@@ -157,6 +162,35 @@ class ModbusWebClient {
         } catch (error) {
             console.error('Refresh failed:', error);
             this.showToast('Refresh failed: ' + error.message, 'error');
+        }
+    }
+
+    async refreshInputsOnly() {
+        if (!this.connected) return;
+
+        try {
+            await this.refreshInputs();
+        } catch (error) {
+            console.error('Inputs refresh failed:', error);
+        }
+    }
+
+    async refreshCoilsAndRegisters() {
+        if (!this.connected) return;
+
+        // Don't auto-refresh if we just made a manual write
+        if (this.lastManualWrite && (Date.now() - this.lastManualWrite) < this.writeDelay) {
+            console.log('Skipping coils/registers refresh due to recent manual write');
+            return;
+        }
+
+        try {
+            await Promise.all([
+                this.refreshCoils(),
+                this.refreshRegisters()
+            ]);
+        } catch (error) {
+            console.error('Coils/registers refresh failed:', error);
         }
     }
 
@@ -363,21 +397,50 @@ class ModbusWebClient {
     }
 
     startAutoRefresh() {
+        this.updateRefreshIntervals();
+    }
+
+    updateRefreshIntervals() {
+        // Clear existing intervals
         if (this.autoRefreshInterval) {
             clearInterval(this.autoRefreshInterval);
         }
+        if (this.inputsRefreshInterval) {
+            clearInterval(this.inputsRefreshInterval);
+        }
         
-        this.autoRefreshInterval = setInterval(() => {
-            if (this.connected) {
-                this.refreshAll();
-            }
-        }, this.refreshInterval);
+        // Only start intervals if auto-refresh is enabled and we're connected
+        if (!document.getElementById('auto-refresh').checked || !this.connected) {
+            return;
+        }
+        
+        // Start inputs refresh timer if enabled
+        if (document.getElementById('inputs-refresh').checked) {
+            this.inputsRefreshInterval = setInterval(() => {
+                if (this.connected) {
+                    this.refreshInputsOnly();
+                }
+            }, this.inputsRefreshIntervalTime);
+        }
+        
+        // Start coils/registers refresh timer if enabled
+        if (document.getElementById('controls-refresh').checked) {
+            this.autoRefreshInterval = setInterval(() => {
+                if (this.connected) {
+                    this.refreshCoilsAndRegisters();
+                }
+            }, this.refreshInterval);
+        }
     }
 
     stopAutoRefresh() {
         if (this.autoRefreshInterval) {
             clearInterval(this.autoRefreshInterval);
             this.autoRefreshInterval = null;
+        }
+        if (this.inputsRefreshInterval) {
+            clearInterval(this.inputsRefreshInterval);
+            this.inputsRefreshInterval = null;
         }
     }
 

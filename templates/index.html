@@ -118,24 +118,42 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="auto-refresh">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="auto-refresh" checked>
-                                <label class="form-check-label" for="auto-refresh">
-                                    Auto Refresh (5 seconds)
-                                </label>
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="auto-refresh" checked>
+                                    <label class="form-check-label" for="auto-refresh">
+                                        Auto Refresh
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Inputs (2s):</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="inputs-refresh" checked>
+                                    <label class="form-check-label" for="inputs-refresh">
+                                        Fast
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Coils/Reg (5s):</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="controls-refresh" checked>
+                                    <label class="form-check-label" for="controls-refresh">
+                                        Normal
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button id="refresh-btn" class="btn btn-primary">
+                                    <i class="fas fa-sync-alt"></i> Refresh Now
+                                </button>
+                            </div>
+                            <div class="col-md-2">
+                                <span class="text-muted">Last updated: <span id="last-update">Never</span></span>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <button id="refresh-btn" class="btn btn-primary">
-                                <i class="fas fa-sync-alt"></i> Refresh Now
-                            </button>
-                        </div>
-                        <div class="col-md-3">
-                            <span class="text-muted">Last updated: <span id="last-update">Never</span></span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -189,7 +207,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5><i class="fas fa-eye"></i> Discrete Inputs (Read Only)</h5>
+                        <h5><i class="fas fa-eye"></i> Discrete Inputs (Read Only) <small class="text-muted">- Fast Refresh (2s)</small></h5>
                         <button class="btn btn-sm btn-outline-primary" onclick="toggleNameEditing('inputs')">
                             <i class="fas fa-edit"></i> Edit Names
                         </button>
@@ -206,7 +224,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5><i class="fas fa-toggle-on"></i> Coils (Read/Write)</h5>
+                        <h5><i class="fas fa-toggle-on"></i> Coils (Read/Write) <small class="text-muted">- Normal Refresh (5s)</small></h5>
                         <button class="btn btn-sm btn-outline-primary" onclick="toggleNameEditing('coils')">
                             <i class="fas fa-edit"></i> Edit Names
                         </button>
@@ -223,7 +241,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5><i class="fas fa-database"></i> Holding Registers (Read/Write)</h5>
+                        <h5><i class="fas fa-database"></i> Holding Registers (Read/Write) <small class="text-muted">- Normal Refresh (5s)</small></h5>
                         <button class="btn btn-sm btn-outline-primary" onclick="toggleNameEditing('registers')">
                             <i class="fas fa-edit"></i> Edit Names
                         </button>
